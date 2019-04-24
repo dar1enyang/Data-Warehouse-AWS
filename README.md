@@ -1,4 +1,4 @@
-# Project: Data Warehouse
+# Data Warehouse on AWS
 
 ### Introduction
 
