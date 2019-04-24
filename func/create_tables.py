@@ -7,7 +7,14 @@ from query.sql_queries import *
 
 
 def drop_tables(cur, conn):
+    """
+    The function to drop all tables in the database
     
+    Returns:
+        cur  : Use the connection to get a cursor that will be used to execute queries.
+        conn : The connection towards current connecting database.
+    """
+
     for query in create_schema_queries:
         cur.execute(query)
         conn.commit()
@@ -21,7 +28,14 @@ def drop_tables(cur, conn):
 
 
 def create_tables(cur, conn):
+    """
+    The function to create tables in the database
     
+    Returns:
+        cur  : Use the connection to get a cursor that will be used to execute queries.
+        conn : The connection towards current connecting database.
+    """
+
     cur.execute(nodist_schema_set)
     conn.commit()
     for query in create_no_dist_table_queries:

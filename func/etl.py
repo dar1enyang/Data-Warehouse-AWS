@@ -7,6 +7,14 @@ from query.sql_queries import copy_table_queries, insert_table_queries, set_sche
 
 
 def load_staging_tables(cur, conn):
+    """
+    The function to load all staging tables to the database
+    
+    Returns:
+        cur  : Use the connection to get a cursor that will be used to execute queries.
+        conn : The connection towards current connecting database.
+    """
+
     for schema in set_schema_queries:
         cur.execute(schema)
         conn.commit()
@@ -16,6 +24,14 @@ def load_staging_tables(cur, conn):
 
 
 def insert_tables(cur, conn):
+    """
+    The function to insert records into the table in the database
+    
+    Returns:
+        cur  : Use the connection to get a cursor that will be used to execute queries.
+        conn : The connection towards current connecting database.
+    """
+
     for schema in set_schema_queries:
         cur.execute(schema)
         conn.commit()
