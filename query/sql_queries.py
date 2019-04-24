@@ -62,14 +62,15 @@ no_dist_staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_song
 
 no_dist_songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplay_table
                             (songplay_id INT IDENTITY(0,1),
-                             start_time BIGINT,
-                             user_id INT,
+                             start_time BIGINT NOT NULL,
+                             user_id INT NOT NULL,
                              level VARCHAR(10),
-                             song_id TEXT,
-                             artist_id TEXT,
+                             song_id TEXT NOT NULL,
+                             artist_id TEXT NOT NULL,
                              session_id INT,
                              location TEXT,
-                             user_agent TEXT)
+                             user_agent TEXT,
+                             PRIMARY KEY(songplay_id))
                              ;"""
                         )
 
@@ -78,15 +79,17 @@ no_dist_user_table_create = ("""CREATE TABLE IF NOT EXISTS user_table
                          first_name TEXT, 
                          last_name TEXT,
                          gender VARCHAR(5),
-                         level VARCHAR(10))
+                         level VARCHAR(10),
+                         PRIMARY KEY(user_id))
                          ;"""
                     )
 
 no_dist_song_table_create = ("""CREATE TABLE IF NOT EXISTS song_table
                         (song_id TEXT,
                          title TEXT,
-                         artist_id TEXT,
+                         artist_id TEXT NOT NULL,
                          year SMALLINT,
+                         PRIMARY KEY(song_id),
                          duration FLOAT)
                          ;"""
                     )
@@ -96,7 +99,8 @@ no_dist_artist_table_create = ("""CREATE TABLE IF NOT EXISTS artist_table
                            name TEXT,
                            location TEXT,
                            lattitude FLOAT,
-                           longitude FLOAT)
+                           longitude FLOAT,
+                           PRIMARY KEY(artist_id))
                            ;"""
                       )
 
@@ -107,7 +111,8 @@ no_dist_time_table_create = ("""CREATE TABLE IF NOT EXISTS time_table
                          week SMALLINT,
                          month SMALLINT,
                          year SMALLINT,
-                         weekday SMALLINT)
+                         weekday SMALLINT,
+                         PRIMARY KEY(start_time))
                          ;"""
                     )
 
@@ -150,32 +155,35 @@ staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_songs_table
 
 songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplay_table
                             (songplay_id INT IDENTITY(0,1),
-                             start_time BIGINT sortkey,
-                             user_id INT,
+                             start_time BIGINT NOT NULL sortkey,
+                             user_id INT NOT NULL,
                              level VARCHAR(10),
-                             song_id TEXT distkey,
-                             artist_id TEXT,
+                             song_id TEXT NOT NULL distkey,
+                             artist_id TEXT NOT NULL,
                              session_id INT,
                              location TEXT,
-                             user_agent TEXT)
+                             user_agent TEXT,
+                             PRIMARY KEY(songplay_id))
                              ;"""
-                        )
+                             )
 
 user_table_create = ("""CREATE TABLE IF NOT EXISTS user_table
                         (user_id INT ,
                          first_name TEXT, 
                          last_name TEXT,
                          gender VARCHAR(5) distkey,
-                         level VARCHAR(10) sortkey)
+                         level VARCHAR(10) sortkey,
+                         PRIMARY KEY(user_id))
                          ;"""
                     )
 
 song_table_create = ("""CREATE TABLE IF NOT EXISTS song_table
                         (song_id TEXT sortkey distkey,
                          title TEXT,
-                         artist_id TEXT,
+                         artist_id TEXT NOT NULL,
                          year SMALLINT,
-                         duration FLOAT)
+                         duration FLOAT,
+                         PRIMARY KEY(song_id))
                          ;"""
                     )
 
@@ -184,7 +192,8 @@ artist_table_create = ("""CREATE TABLE IF NOT EXISTS artist_table
                            name TEXT,
                            location TEXT,
                            lattitude FLOAT,
-                           longitude FLOAT)
+                           longitude FLOAT,
+                           PRIMARY KEY(artist_id))
                            ;"""
                       )
 
@@ -195,7 +204,8 @@ time_table_create = ("""CREATE TABLE IF NOT EXISTS time_table
                          week SMALLINT,
                          month SMALLINT,
                          year SMALLINT,
-                         weekday SMALLINT)
+                         weekday SMALLINT,
+                         PRIMARY KEY(start_time))
                          diststyle all;"""
                     )
 # STAGING TABLES
