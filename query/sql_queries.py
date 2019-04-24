@@ -5,6 +5,12 @@ import configparser
 config = configparser.ConfigParser()
 config.read('dwh.cfg')
 
+# SCHEMA
+nodist_schema_create = "CREATE SCHEMA IF NOT EXISTS nodist;"
+dist_schema_create   = "CREATE SCHEMA IF NOT EXISTS dist;"
+
+nodist_schema_set    = "SET search_path TO nodist;"
+dist_schema_set      = "SET search_path TO dist;"
 # DROP TABLES
 ## Staging tables
 staging_events_table_drop = "DROP TABLE IF EXISTS staging_events_table"
@@ -17,19 +23,19 @@ song_table_drop           = "DROP TABLE IF EXISTS song_table;"
 artist_table_drop         = "DROP TABLE IF EXISTS artist_table;"
 time_table_drop           = "DROP TABLE IF EXISTS time_table;"
 
-# CREATE TABLES
-staging_events_table_create = ("""CREATE TABLE IF NOT EXISTS staging_events_table (
+# CREATE NO DIST TABLES
+no_dist_staging_events_table_create = ("""CREATE TABLE IF NOT EXISTS staging_events_table (
                                   artist TEXT, 
-                                  auth VARCHAR(15), 
+                                  auth VARCHAR(30), 
                                   firstName TEXT, 
                                   gender VARCHAR(5), 
                                   itemInSession SMALLINT,
                                   lastName TEXT, 
                                   length FLOAT, 
-                                  level VARCHAR(5), 
+                                  level VARCHAR(10), 
                                   location TEXT,
                                   method VARCHAR(10),
-                                  page VARCHAR(10),
+                                  page VARCHAR(20),
                                   registration BIGINT, 
                                   sessionId INT,
                                   song TEXT,
@@ -40,7 +46,7 @@ staging_events_table_create = ("""CREATE TABLE IF NOT EXISTS staging_events_tabl
                                   ;"""
                              )
 
-staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_songs_table
+no_dist_staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_songs_table
                                  (num_songs SMALLINT,
                                   artist_id TEXT,
                                   artist_latitude FLOAT,
@@ -54,11 +60,11 @@ staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_songs_table
                                   ;"""
                              )
 
-songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplay_table
+no_dist_songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplay_table
                             (songplay_id INT IDENTITY(0,1),
-                             start_time BIGINT sortkey,
+                             start_time BIGINT,
                              user_id INT,
-                             level VARCHAR(5),
+                             level VARCHAR(10),
                              song_id TEXT,
                              artist_id TEXT,
                              session_id INT,
@@ -67,13 +73,101 @@ songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplay_table
                              ;"""
                         )
 
-user_table_create = ("""CREATE TABLE IF NOT EXISTS user_table
+no_dist_user_table_create = ("""CREATE TABLE IF NOT EXISTS user_table
                         (user_id INT,
                          first_name TEXT, 
                          last_name TEXT,
                          gender VARCHAR(5),
-                         level VARCHAR(5))
-                         diststyle all;"""
+                         level VARCHAR(10))
+                         ;"""
+                    )
+
+no_dist_song_table_create = ("""CREATE TABLE IF NOT EXISTS song_table
+                        (song_id TEXT,
+                         title TEXT,
+                         artist_id TEXT,
+                         year SMALLINT,
+                         duration FLOAT)
+                         ;"""
+                    )
+
+no_dist_artist_table_create = ("""CREATE TABLE IF NOT EXISTS artist_table
+                          (artist_id TEXT,
+                           name TEXT,
+                           location TEXT,
+                           lattitude FLOAT,
+                           longitude FLOAT)
+                           ;"""
+                      )
+
+no_dist_time_table_create = ("""CREATE TABLE IF NOT EXISTS time_table
+                        (start_time BIGINT,
+                         hour SMALLINT,
+                         day SMALLINT,
+                         week SMALLINT,
+                         month SMALLINT,
+                         year SMALLINT,
+                         weekday SMALLINT)
+                         ;"""
+                    )
+
+# CREATE DIST TABLES
+staging_events_table_create = ("""CREATE TABLE IF NOT EXISTS staging_events_table (
+                                  artist TEXT, 
+                                  auth VARCHAR(30), 
+                                  firstName TEXT, 
+                                  gender VARCHAR(5), 
+                                  itemInSession SMALLINT,
+                                  lastName TEXT, 
+                                  length FLOAT, 
+                                  level VARCHAR(10), 
+                                  location TEXT,
+                                  method VARCHAR(10),
+                                  page VARCHAR(20) sortkey,
+                                  registration BIGINT, 
+                                  sessionId INT,
+                                  song TEXT,
+                                  status SMALLINT,
+                                  ts BIGINT,
+                                  userAgent TEXT,
+                                  userId INT distkey)
+                                  ;"""
+                             )
+
+staging_songs_table_create = ("""CREATE TABLE IF NOT EXISTS staging_songs_table
+                                 (num_songs SMALLINT,
+                                  artist_id TEXT,
+                                  artist_latitude FLOAT,
+                                  artist_longitude FLOAT,
+                                  artist_location TEXT,
+                                  artist_name TEXT,
+                                  song_id TEXT distkey,
+                                  title TEXT,
+                                  duration FLOAT,
+                                  year SMALLINT)
+                                  ;"""
+                             )
+
+songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplay_table
+                            (songplay_id INT IDENTITY(0,1),
+                             start_time BIGINT sortkey,
+                             user_id INT,
+                             level VARCHAR(10),
+                             song_id TEXT distkey,
+                             artist_id TEXT,
+                             session_id INT,
+                             location TEXT,
+                             user_agent TEXT)
+                             ;"""
+                        )
+
+user_table_create = ("""CREATE TABLE IF NOT EXISTS user_table
+                        (user_id INT ,
+                         first_name TEXT, 
+                         last_name TEXT,
+                         gender VARCHAR(5) distkey,
+                         level VARCHAR(10) sortkey)
+                         ;"""
                     )
 
 song_table_create = ("""CREATE TABLE IF NOT EXISTS song_table
@@ -86,12 +180,12 @@ song_table_create = ("""CREATE TABLE IF NOT EXISTS song_table
                     )
 
 artist_table_create = ("""CREATE TABLE IF NOT EXISTS artist_table
-                          (artist_id TEXT,
+                          (artist_id TEXT sortkey distkey,
                            name TEXT,
                            location TEXT,
                            lattitude FLOAT,
                            longitude FLOAT)
-                           diststyle all;"""
+                           ;"""
                       )
 
 time_table_create = ("""CREATE TABLE IF NOT EXISTS time_table
@@ -104,20 +198,17 @@ time_table_create = ("""CREATE TABLE IF NOT EXISTS time_table
                          weekday SMALLINT)
                          diststyle all;"""
                     )
-
 # STAGING TABLES
-# log_data/2018/11/2018-11-12-events.json
 staging_events_copy = ("""copy staging_events_table from 's3://udacity-dend/log_data'
-credentials 'aws_iam_role = {}'
+credentials 'aws_iam_role={}'
 region 'us-west-2'
 JSON 'auto' truncatecolumns
 ;""").format('arn:aws:iam::787896866770:role/dar1en-role-iam')
-# song_data/A/B/C/TRABCEI128F424C983.json
+
 staging_songs_copy = ("""copy staging_songs_table from 's3://udacity-dend/song_data'
-credentials 'aws_iam_role = {}'
-region 'us-west-2'
-JSON 'auto' truncatecolumns
-;""").format('arn:aws:iam::787896866770:role/dar1en-role-iam')
+credentials 'aws_iam_role={}' 
+region 'us-west-2' 
+JSON 'auto' truncatecolumns;""").format('arn:aws:iam::787896866770:role/dar1en-role-iam')
 
 # INSERT TABLES
 songplay_table_insert = ("""INSERT INTO songplay_table (
@@ -199,11 +290,15 @@ time_table_insert = ("""INSERT INTO time_table (
                         FROM staging_events_table
                         ;""")
 
+
 # QUERY LISTS
 
-create_table_queries = [staging_events_table_create, staging_songs_table_create, user_table_create, song_table_create, artist_table_create, time_table_create, songplay_table_create]
-drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop, songplay_table_drop]
-copy_table_queries = [staging_events_copy, staging_songs_copy]
-insert_table_queries = [user_table_insert, song_table_insert, artist_table_insert, time_table_insert, songplay_table_insert]
-#insert_table_queries = [user_table_insert, song_table_insert, artist_table_insert, time_table_insert, songplay_table_insert]
+create_schema_queries         = [nodist_schema_create, dist_schema_create]
+set_schema_queries            = [nodist_schema_set, dist_schema_set]
+create_table_queries          = [staging_events_table_create, staging_songs_table_create, user_table_create, song_table_create, artist_table_create, time_table_create, songplay_table_create]
+create_no_dist_table_queries  = [no_dist_staging_events_table_create, no_dist_staging_songs_table_create, no_dist_user_table_create, no_dist_song_table_create, no_dist_artist_table_create, no_dist_time_table_create, no_dist_songplay_table_create]
+drop_table_queries            = [staging_events_table_drop, staging_songs_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop, songplay_table_drop]
+copy_table_queries            = [staging_events_copy, staging_songs_copy]
+insert_table_queries          = [user_table_insert, song_table_insert, artist_table_insert, time_table_insert, songplay_table_insert]
+
 

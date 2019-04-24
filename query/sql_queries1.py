@@ -104,13 +104,13 @@ time_table_create = ("""CREATE TABLE IF NOT EXISTS time_table
                          )
 
 # STAGING TABLES
-staging_events_copy = ("""copy staging_events_table from 's3://udacity-dend/log-data'
+staging_events_copy = ("""copy staging_events_table from 's3://udacity-dend/log_data'
 credentials 'aws_iam_role={}'
 region 'us-west-2'
 JSON 'auto' truncatecolumns
 ;""").format('arn:aws:iam::787896866770:role/dar1en-role-iam')
 
-staging_songs_copy = ("""copy staging_songs_table from 's3://udacity-dend/song-data'
+staging_songs_copy = ("""copy staging_songs_table from 's3://udacity-dend/song_data'
 credentials 'aws_iam_role={}' 
 region 'us-west-2' 
 JSON 'auto' truncatecolumns;""").format('arn:aws:iam::787896866770:role/dar1en-role-iam')
