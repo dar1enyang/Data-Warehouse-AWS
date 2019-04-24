@@ -2,9 +2,7 @@
 
 ### Introduction
 
-As the user and song database keeps growing bigger and bigger, moving the data onto the cloud seems to be a better option. 
-
-Now the data resides in Amazon S3, in a directory of JSON logs on user activity on the app, as well as a directory with JSON metadata on the songs in their app.
+As the user and song database keeps growing bigger and bigger, moving the data onto the cloud seems to be a better option. Now the data resides in Amazon S3, in a directory of JSON logs on user activity on the app, as well as a directory with JSON metadata on the songs in their app.
 
 The task is to build an ETL pipeline that extracts the data from S3, stages them in Redshift, and transforms data into a set of dimensional tables for the analytics team to continue finding insights in what songs users are listening to.
 
