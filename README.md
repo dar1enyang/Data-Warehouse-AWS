@@ -1,6 +1,6 @@
 # Data Warehouse on AWS
 
-### Introduction
+###  Introduction
 
 As the user and song database keeps growing bigger and bigger, moving the data onto the cloud seems to be a better option. Now the data resides in Amazon S3, in a directory of JSON logs on user activity on the app, as well as a directory with JSON metadata on the songs in their app.
 
