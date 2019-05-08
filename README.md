@@ -14,7 +14,7 @@ Design and structure data to make it available to the others in the team. So the
 
 Throughout this project, I have completed the following tasks:
 
-1. Design schemas for your fact and dimension tables
+1. Design schemas for the fact and dimension tables
 2. Build an ETL pipeline to load data from S3 to staging tables and analytics tables on Redshift
 3. Improve query performance by running analytic queries on Redshift database
 
